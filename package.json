@@ -1,5 +1,6 @@
 {
   "name": "poketype-vite",
+  "repositoryName": "pokefav-type",
   "version": "0.0.0",
   "private": true,
   "type": "module",
