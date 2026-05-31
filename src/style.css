@@ -90,7 +90,7 @@ body {
     /* 1 header + 18 types + 1 fav */
     grid-template-columns: 30px repeat(18, 1fr) 1fr; 
     /* 1 header + 18 types + 1 legendary */
-    grid-template-rows: 30px repeat(18, 1fr) 1fr;
+    grid-template-rows: 30px repeat(18, 1fr) 1fr 1fr;
     gap: 1px;
     margin-top: 1rem;
 }
@@ -154,6 +154,121 @@ body {
 
 /* Remove sticky for export */
 .exporting .header-cell { position: static !important; }
+
+#export-area {
+    width: 100%;
+}
+
+.exporting .extra-selections {
+    border-top: 2px solid var(--border-color);
+}
+
+.grid-cell.special-cell {
+    cursor: pointer;
+}
+
+/* Crown icon on Overall Favorite */
+.crown-cell {
+    position: relative;
+}
+.crown-cell::before {
+    content: '👑';
+    position: absolute;
+    top: -8px;
+    font-size: 1.4rem;
+    z-index: 1;
+    filter: none;
+}
+
+/* Generation Percentages */
+.percentages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.percentage-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+.percentage-label {
+    min-width: 60px;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.percentage-track {
+    flex: 1;
+    height: 24px;
+    background-color: #333;
+    border-radius: 12px;
+    overflow: visible;
+}
+.percentage-fill {
+    position: relative;
+    height: 100%;
+    min-height: 24px;
+    border-radius: 12px;
+    transition: width 0.4s ease;
+}
+.percentage-fill.fill-poke {
+    background: linear-gradient(90deg, #c0392b, #e74c3c);
+}
+.percentage-fill.fill-ultra {
+    background: linear-gradient(90deg, #f39c12, #f1c40f);
+}
+.percentage-fill.fill-super {
+    background: linear-gradient(90deg, #2980b9, #3498db);
+}
+.percentage-fill.fill-premier {
+    background: linear-gradient(90deg, #bdc3c7, #ecf0f1);
+}
+.percentage-fill.fill-master {
+    background: linear-gradient(90deg, #7d3c98, #a569bd);
+}
+.percentage-value {
+    min-width: 80px;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+/* Pokéball icons at bar tips */
+.ball-icon {
+    position: absolute;
+    right: -13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    z-index: 2;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.ball-poke {
+    background-image: url('https://www.serebii.net/itemdex/sprites/pokeball.png');
+}
+.ball-ultra {
+    background-image: url('https://www.serebii.net/itemdex/sprites/ultraball.png');
+}
+.ball-super {
+    background-image: url('https://www.serebii.net/itemdex/sprites/greatball.png');
+}
+.ball-premier {
+    background-image: url('https://www.serebii.net/itemdex/sprites/premierball.png');
+}
+.ball-master {
+    background-image: url('https://www.serebii.net/itemdex/sprites/masterball.png');
+}
+
+
 
 
 /* Extra Selections Styling */

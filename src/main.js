@@ -11,6 +11,7 @@ const gridContainer = document.getElementById('grid-container');
 const teamBuilderContainer = document.getElementById('team-builder-container');
 const overallFavoriteContainer = document.getElementById('overall-favorite-container');
 const genFavoritesContainer = document.getElementById('gen-favorites-container');
+const starterFavoritesContainer = document.getElementById('starter-favorites-container');
 const modal = document.getElementById('selection-modal');
 const modalHeader = document.querySelector('.modal-header');
 const modalTitle = document.getElementById('modal-title');
@@ -26,6 +27,7 @@ const langSwitcher = document.getElementById('lang-switcher');
 let types = [];
 let generations = [];
 let pokemonData = [];
+let starters = [];
 let currentCell = null;
 let translations = {};
 let currentLanguage = 'en';
@@ -85,11 +87,13 @@ async function initialize() {
         if (!pokemonRes.ok || !typesRes.ok) throw new Error('Failed to load data files.');
         
         pokemonData = await pokemonRes.json();
+        starters = pokemonData.filter(p => p.is_starter);
         types = Object.keys(await typesRes.json());
         generations = [...new Set(pokemonData.map(p => p.generation))].sort((a, b) => a.split('-')[1] - b.split('-')[1]);
 
         createGrid();
         createExtraSlots();
+        createGenPercentages();
         updateEmptyCells(); // Add this call
         loadSelections();
         updateAllDependentStates();
@@ -100,7 +104,7 @@ async function initialize() {
 }
 
 function updateEmptyCells() {
-    document.querySelectorAll('.grid-cell[data-cell-type="combo"], .grid-cell[data-cell-type="legendary-type"]').forEach(cell => {
+    document.querySelectorAll('.grid-cell[data-cell-type="combo"], .grid-cell[data-cell-type="legendary-type"], .grid-cell[data-cell-type="special-type"]').forEach(cell => {
         const pokemonOptions = getPokemonForCell(cell);
         if (pokemonOptions.length === 0) {
             cell.classList.add('empty-cell', 'disabled');
@@ -112,7 +116,7 @@ function updateEmptyCells() {
 // --- UI CREATION ---
 function createGrid() {
     const gridCols = `30px repeat(${types.length}, 1fr) 1fr`;
-    const gridRows = `30px repeat(${types.length}, 1fr) 1fr`;
+    const gridRows = `30px repeat(${types.length}, 1fr) 1fr 1fr`;
     gridContainer.style.gridTemplateColumns = gridCols;
     gridContainer.style.gridTemplateRows = gridRows;
     gridContainer.innerHTML = ''; // Clear it
@@ -133,6 +137,12 @@ function createGrid() {
         gridContainer.innerHTML += `<div class="grid-cell favorite-cell disabled" style="background-color: ${rowColor};" data-cell-type="favorite-type" data-type1="${type1}" id="cell-favorite-type-${type1}"></div>`;
     });
 
+    // Special Forms Row (Mega & Gigantamax)
+    const specialRowColor = hexToRgba('#9B59B6', 0.1);
+    gridContainer.innerHTML += `<div class="header-cell" style="background-color: #9B59B6" title="${translations.specialRowHeader || 'SPE'}">${translations.specialRowHeader || 'SPE'}</div>`;
+    types.forEach(type => gridContainer.innerHTML += `<div class="grid-cell special-cell" style="background-color: ${specialRowColor};" data-cell-type="special-type" data-type1="${type}" id="cell-special-type-${type}"></div>`);
+    gridContainer.innerHTML += `<div class="grid-cell favorite-cell disabled" style="background-color: ${specialRowColor};" data-cell-type="favorite-special" id="cell-favorite-special"></div>`;
+
     // Legendary Row
     const legendaryRowColor = hexToRgba(typeColors['dragon'], 0.1);
     gridContainer.innerHTML += `<div class="header-cell" style="background-color: #D4AF37" title="${translations.legendaryRowHeader || 'LEG'}">${translations.legendaryRowHeader || 'LEG'}</div>`;
@@ -144,10 +154,74 @@ function createExtraSlots() {
     teamBuilderContainer.innerHTML = '';
     overallFavoriteContainer.innerHTML = '';
     genFavoritesContainer.innerHTML = '';
+    starterFavoritesContainer.innerHTML = '';
 
     for (let i = 0; i < 6; i++) teamBuilderContainer.innerHTML += `<div class="slot-cell" data-cell-type="team" data-slot-id="${i}" id="cell-team-${i}"><span class="slot-label">${translations.teamSlotLabel || 'Team'} ${i+1}</span></div>`;
-    overallFavoriteContainer.innerHTML += `<div class="slot-cell" data-cell-type="favorite-overall" id="cell-favorite-overall"><span class="slot-label">${translations.overallSlotLabel || 'Overall'}</span></div>`;
+    overallFavoriteContainer.innerHTML += `<div class="slot-cell crown-cell" data-cell-type="favorite-overall" id="cell-favorite-overall"><span class="slot-label">${translations.overallSlotLabel || 'Overall'}</span></div>`;
     generations.forEach((gen, i) => genFavoritesContainer.innerHTML += `<div class="slot-cell" data-cell-type="favorite-gen" data-gen-name="${gen}" id="cell-favorite-gen-${i}"><span class="slot-label">${(translations.genSlotLabel || 'Gen')} ${gen.split('-')[1].toUpperCase()}</span></div>`);
+    starterFavoritesContainer.innerHTML += `<div class="slot-cell" data-cell-type="favorite-starter" id="cell-favorite-starter"><span class="slot-label">${translations.starterSlotLabel || 'Starter'}</span></div>`;
+}
+
+function createGenPercentages() {
+    const container = document.getElementById('gen-percentages-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const genCounts = {};
+    let totalSelected = 0;
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('selection-cell-combo-')) {
+            try {
+                const selection = JSON.parse(localStorage.getItem(key));
+                if (selection) {
+                    const pokemon = pokemonData.find(p => p.id === selection.id);
+                    if (pokemon && pokemon.generation) {
+                        genCounts[pokemon.generation] = (genCounts[pokemon.generation] || 0) + 1;
+                        totalSelected++;
+                    }
+                }
+            } catch (e) { /* skip invalid */ }
+        }
+    }
+
+    if (totalSelected === 0) {
+        container.innerHTML = `<p>${translations.genPercentagesEmpty || 'No Pokémon selected yet.'}</p>`;
+        return;
+    }
+
+    // Sort by count descending for display (highest % first)
+    const displayGens = Object.keys(genCounts).sort((a, b) => genCounts[b] - genCounts[a]);
+
+    // Rank by count descending for ball assignment
+    const ranked = displayGens.map(gen => ({ gen, count: genCounts[gen] }));
+
+    const ballOrder = ['master', 'ultra', 'ultra', 'super', 'super', 'premier', 'premier', 'poke', 'poke'];
+    const genBallMap = {};
+    ranked.forEach((item, i) => {
+        genBallMap[item.gen] = ballOrder[i] || 'poke';
+    });
+
+    displayGens.forEach(gen => {
+        const count = genCounts[gen];
+        const percentage = (count / totalSelected) * 100;
+        const genLabel = `${(translations.genSlotLabel || 'Gen')} ${gen.split('-')[1].toUpperCase()}`;
+        const ballType = genBallMap[gen];
+
+        const bar = document.createElement('div');
+        bar.className = 'percentage-bar';
+        bar.innerHTML = `
+            <span class="percentage-label">${genLabel}</span>
+                <div class="percentage-track">
+                    <div class="percentage-fill fill-${ballType}" style="width: ${percentage}%">
+                    <span class="ball-icon ball-${ballType}"></span>
+                </div>
+            </div>
+            <span class="percentage-value">${percentage.toFixed(1)}% (${count})</span>
+        `;
+        container.appendChild(bar);
+    });
 }
 
 
@@ -291,10 +365,16 @@ function getPokemonForCell(cell) {
             });
         case 'legendary-type':
             return pokemonData.filter(p => (p.is_legendary || p.is_mythical) && p.types.some(t => t.name === type1));
+        case 'special-type':
+            return pokemonData.filter(p => (p.is_mega || p.is_gmax) && p.types.some(t => t.name === type1));
         case 'favorite-type':
-            return getRowSelections(type1, false);
+            return getRowSelections(type1);
         case 'favorite-legendary':
-            return getRowSelections('legendary', true);
+            return getRowSelections('legendary');
+        case 'favorite-special':
+            return getRowSelections('special');
+        case 'favorite-starter':
+            return starters;
         case 'team':
         case 'favorite-overall':
             return allSelected;
@@ -323,9 +403,10 @@ function clearSelection() {
     labelSpan.className = 'slot-label';
     let labelText = '';
     const { cellType, slotId, genName } = currentCell.dataset;
-    if(cellType === 'team') labelText = `${translations.teamSlotLabel || 'Team'} ${parseInt(slotId)+1}`;
+    if (cellType === 'team') labelText = `${translations.teamSlotLabel || 'Team'} ${parseInt(slotId)+1}`;
     else if (cellType === 'favorite-overall') labelText = translations.overallSlotLabel || 'Overall';
     else if (cellType === 'favorite-gen') labelText = `${translations.genSlotLabel || 'Gen'} ${genName.split('-')[1].toUpperCase()}`;
+    else if (cellType === 'favorite-starter') labelText = translations.starterSlotLabel || 'Starter';
     
     currentCell.innerHTML = '';
     if(labelText) {
@@ -362,12 +443,17 @@ function renderCell(cell, pokemon, isShiny) {
     if (label) cell.appendChild(label);
 }
 
-function getRowSelections(type1, isLegendaryRow) {
+function getRowSelections(rowType) {
     const selected = new Set();
-    const keys = isLegendaryRow 
-        ? types.map(t2 => `selection-cell-legendary-type-${t2}`)
-        : types.map(t2 => `selection-cell-combo-${type1}-${t2}`);
-    
+    let keys;
+    if (rowType === 'legendary') {
+        keys = types.map(t2 => `selection-cell-legendary-type-${t2}`);
+    } else if (rowType === 'special') {
+        keys = types.map(t2 => `selection-cell-special-type-${t2}`);
+    } else {
+        keys = types.map(t2 => `selection-cell-combo-${rowType}-${t2}`);
+    }
+
     keys.forEach(key => {
         const selection = JSON.parse(localStorage.getItem(key));
         if (selection) selected.add(selection.id);
@@ -380,7 +466,7 @@ function getAllSelectedPokemon() {
     const selected = new Set();
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('selection-cell-combo') || key.startsWith('selection-cell-legendary-type')) {
+        if (key.startsWith('selection-cell-combo') || key.startsWith('selection-cell-legendary-type') || key.startsWith('selection-cell-special-type')) {
             const selection = JSON.parse(localStorage.getItem(key));
             if (selection) selected.add(selection.id);
         }
@@ -391,23 +477,27 @@ function getAllSelectedPokemon() {
 function updateAllDependentStates() {
     types.forEach(type1 => {
         const favTypeCell = document.getElementById(`cell-favorite-type-${type1}`);
-        if(favTypeCell) getRowSelections(type1, false).length > 0 ? favTypeCell.classList.remove('disabled') : favTypeCell.classList.add('disabled');
+        if(favTypeCell) getRowSelections(type1).length > 0 ? favTypeCell.classList.remove('disabled') : favTypeCell.classList.add('disabled');
     });
     const favLegendaryCell = document.getElementById('cell-favorite-legendary');
-    if(favLegendaryCell) getRowSelections('legendary', true).length > 0 ? favLegendaryCell.classList.remove('disabled') : favLegendaryCell.classList.add('disabled');
+    if(favLegendaryCell) getRowSelections('legendary').length > 0 ? favLegendaryCell.classList.remove('disabled') : favLegendaryCell.classList.add('disabled');
+    const favSpecialCell = document.getElementById('cell-favorite-special');
+    if(favSpecialCell) getRowSelections('special').length > 0 ? favSpecialCell.classList.remove('disabled') : favSpecialCell.classList.add('disabled');
+    createGenPercentages();
 }
 
 function exportGridAsImage() {
-    gridContainer.classList.add('exporting');
+    const exportArea = document.getElementById('export-area');
+    exportArea.classList.add('exporting');
     requestAnimationFrame(() => {
-        html2canvas(gridContainer, { useCORS: true, backgroundColor: getComputedStyle(document.body).backgroundColor })
+        html2canvas(exportArea, { useCORS: true, backgroundColor: getComputedStyle(document.body).backgroundColor })
         .then(canvas => {
             const link = document.createElement('a');
             link.download = 'pokemon-favorites.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
         }).catch(err => console.error("Failed to export image:", err))
-        .finally(() => gridContainer.classList.remove('exporting'));
+        .finally(() => exportArea.classList.remove('exporting'));
     });
 }
 

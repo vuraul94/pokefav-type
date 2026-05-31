@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n-key="pageTitle">Pokémon Favorite Type Selector</title>
+    <link rel="icon" type="image/png" href="/loveball.png">
 </head>
 <body>
     <div id="app">
@@ -22,22 +23,34 @@
             </div>
         </header>
 
-        <main id="grid-container"></main>
+        <div id="export-area">
+            <main id="grid-container"></main>
 
-        <section class="extra-selections">
-            <h2 data-i18n-key="teamBuilderTitle">Team Builder</h2>
-            <div id="team-builder-container" class="slots-container"></div>
-        </section>
+            <section class="extra-selections">
+                <h2 data-i18n-key="genFavoritesTitle">Favorites by Generation</h2>
+                <div id="gen-favorites-container" class="slots-container"></div>
+            </section>
 
-        <section class="extra-selections">
-            <h2 data-i18n-key="overallFavoriteTitle">Overall Favorite</h2>
-            <div id="overall-favorite-container" class="slots-container"></div>
-        </section>
-        
-        <section class="extra-selections">
-            <h2 data-i18n-key="genFavoritesTitle">Favorites by Generation</h2>
-            <div id="gen-favorites-container" class="slots-container"></div>
-        </section>
+            <section class="extra-selections">
+                <h2 data-i18n-key="starterFavoritesTitle">Favorite Starter</h2>
+                <div id="starter-favorites-container" class="slots-container"></div>
+            </section>
+
+            <section class="extra-selections">
+                <h2 data-i18n-key="teamBuilderTitle">Team Builder</h2>
+                <div id="team-builder-container" class="slots-container"></div>
+            </section>
+
+            <section class="extra-selections">
+                <h2 data-i18n-key="overallFavoriteTitle">Overall Favorite</h2>
+                <div id="overall-favorite-container" class="slots-container"></div>
+            </section>
+
+            <section class="extra-selections" id="gen-percentages-section">
+                <h2 data-i18n-key="genPercentagesTitle">Favorites % by Generation</h2>
+                <div id="gen-percentages-container" class="percentages-container"></div>
+            </section>
+        </div>
     </div>
 
     <div id="selection-modal" class="hidden">
