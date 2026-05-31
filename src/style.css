@@ -131,6 +131,14 @@ body {
     opacity: 0.7;
 }
 
+.grid-cell.empty-cell {
+    background-color: #000 !important;
+    cursor: not-allowed;
+}
+.grid-cell.empty-cell:hover {
+    background-color: #000 !important;
+}
+
 .header-cell {
     font-size: 10px;
     font-weight: bold;

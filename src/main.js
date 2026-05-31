@@ -90,12 +90,22 @@ async function initialize() {
 
         createGrid();
         createExtraSlots();
+        updateEmptyCells(); // Add this call
         loadSelections();
         updateAllDependentStates();
         setupEventListeners();
     } catch (error) {
         document.getElementById('app').innerHTML = `<p style="color: red;">Error initializing app: ${error.message}</p>`;
     }
+}
+
+function updateEmptyCells() {
+    document.querySelectorAll('.grid-cell[data-cell-type="combo"], .grid-cell[data-cell-type="legendary-type"]').forEach(cell => {
+        const pokemonOptions = getPokemonForCell(cell);
+        if (pokemonOptions.length === 0) {
+            cell.classList.add('empty-cell', 'disabled');
+        }
+    });
 }
 
 
