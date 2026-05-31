@@ -1,34 +1,43 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selector de Pokémon Favoritos por Tipo</title>
-  <script type="module" crossorigin src="/assets/index-BrG9xjqG.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-RaQu8-Ae.css">
+    <title data-i18n-key="pageTitle">Pokémon Favorite Type Selector</title>
+  <script type="module" crossorigin src="/my-pokemon-selector/assets/index-DS_qg9j3.js"></script>
+  <link rel="stylesheet" crossorigin href="/my-pokemon-selector/assets/index-BlIAr0IN.css">
 </head>
 <body>
     <div id="app">
         <header>
-            <h1>Selector de Pokémon Favoritos</h1>
-            <p>Haz clic en una celda para elegir tu Pokémon. Haz clic en un Pokémon ya elegido para cambiar entre normal y shiny.</p>
-            <button id="export-btn">Exportar como Imagen</button>
+            <h1 data-i18n-key="headerTitle">Favorite Pokémon Selector</h1>
+            <p data-i18n-key="headerSubtitle">Click a cell to choose your favorite Pokémon. Click an already chosen Pokémon to toggle between normal and shiny.</p>
+            <div class="controls-container">
+                <button id="export-btn" data-i18n-key="exportButton">Export as Image</button>
+                <button id="export-selection-btn" data-i18n-key="exportSelectionButton">Export Selection</button>
+                <label class="button-like-label" for="import-selection-input" data-i18n-key="importSelectionButton">Import Selection</label>
+                <input type="file" id="import-selection-input" accept=".json" style="display: none;">
+                <div id="lang-switcher">
+                    <button data-lang="en">EN</button>
+                    <button data-lang="es">ES</button>
+                </div>
+            </div>
         </header>
 
         <main id="grid-container"></main>
 
         <section class="extra-selections">
-            <h2>Creador de Equipo</h2>
+            <h2 data-i18n-key="teamBuilderTitle">Team Builder</h2>
             <div id="team-builder-container" class="slots-container"></div>
         </section>
 
         <section class="extra-selections">
-            <h2>Favorito General</h2>
+            <h2 data-i18n-key="overallFavoriteTitle">Overall Favorite</h2>
             <div id="overall-favorite-container" class="slots-container"></div>
         </section>
         
         <section class="extra-selections">
-            <h2>Favoritos por Generación</h2>
+            <h2 data-i18n-key="genFavoritesTitle">Favorites by Generation</h2>
             <div id="gen-favorites-container" class="slots-container"></div>
         </section>
     </div>
@@ -36,7 +45,7 @@
     <div id="selection-modal" class="hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title"></h2>
+                <h2 id="modal-title" data-i18n-key="modalSelectTitle">Select Pokémon</h2>
                 <button id="close-modal-btn">&times;</button>
             </div>
             <div id="modal-pokemon-list"></div>

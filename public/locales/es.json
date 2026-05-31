@@ -1,0 +1,21 @@
+{
+    "pageTitle": "Selector de Pokémon Favoritos por Tipo",
+    "headerTitle": "Selector de Pokémon Favoritos",
+    "headerSubtitle": "Haz clic en una celda para elegir tu Pokémon. Haz clic en un Pokémon ya elegido para cambiar entre normal y shiny.",
+    "exportButton": "Exportar como Imagen",
+    "exportSelectionButton": "Exportar Selección",
+    "importSelectionButton": "Importar Selección",
+    "teamBuilderTitle": "Creador de Equipo",
+    "overallFavoriteTitle": "Favorito General",
+    "genFavoritesTitle": "Favoritos por Generación",
+    "teamSlotLabel": "Equipo",
+    "overallSlotLabel": "General",
+    "genSlotLabel": "Gen",
+    "legendaryHeader": "LEG",
+    "favoriteHeader": "FAV",
+    "modalSelectTitle": "Seleccionar Pokémon",
+    "modalClearButton": "Limpiar",
+    "modalNoPokemon": "No hay Pokémon que coincidan con esta selección.",
+    "legendaryRowHeader": "LEG",
+    "favoriteTypeSuffix": "(Fav)"
+}
